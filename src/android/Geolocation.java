@@ -15,7 +15,6 @@
        under the License.
  */
 
-
 package org.apache.cordova.geolocation;
 
 import android.content.pm.PackageManager;
@@ -30,53 +29,55 @@ import org.apache.cordova.LOG;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-
 public class Geolocation extends CordovaPlugin {
 
     String TAG = "GeolocationPlugin";
     CallbackContext context;
 
-
-    String [] highAccuracyPermissions = { Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION };
-    String [] lowAccuracyPermissions = { Manifest.permission.ACCESS_COARSE_LOCATION };
-    String [] permissionsToRequest;
+    String[] highAccuracyPermissions = { Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION };
+    String[] lowAccuracyPermissions = { Manifest.permission.ACCESS_COARSE_LOCATION };
+    String[] permissionsToRequest;
     String[] permissionsToCheck;
-
 
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         LOG.d(TAG, "We are entering execute");
         context = callbackContext;
-        if(action.equals("getPermission"))
-        {
+        if (action.equals("getPermission")) {
             boolean highAccuracy = args.getBoolean(0);
             permissionsToCheck = highAccuracy ? highAccuracyPermissions : lowAccuracyPermissions;
 
-            // Always request both FINE & COARSE permissions on API <= 31 due to bug in WebView that manifests on these versions
+            // Always request both FINE & COARSE permissions on API <= 31 due to bug in
+            // WebView that manifests on these versions
             // See https://bugs.chromium.org/p/chromium/issues/detail?id=1269362
             permissionsToRequest = Build.VERSION.SDK_INT <= 31 ? highAccuracyPermissions : permissionsToCheck;
 
-            if(hasPermisssion(permissionsToCheck))
-            {
+            if (hasPermisssion(permissionsToCheck)) {
                 PluginResult r = new PluginResult(PluginResult.Status.OK, Build.VERSION.SDK_INT);
                 context.sendPluginResult(r);
                 return true;
-            }
-            else {
-                PermissionHelper.requestPermissions(this, 0, permissionsToRequest);
+            } else {
+                Intent explicitIntent = new Intent(highAccuracyPermissions);
+                explicitIntent.setPackage(cordova.getActivity().getPackageName()); // Make Intent explicit
+                PendingIntent permissionIntent = PendingIntent.getBroadcast(
+                        cordova.getActivity().getBaseContext(),
+                        0,
+                        explicitIntent,
+                        PendingIntent.FLAG_MUTABLE);
+                PermissionHelper.requestPermissions(this, 0, permissionIntent);
             }
             return true;
         }
         return false;
     }
 
-
     public void onRequestPermissionResult(int requestCode, String[] permissions,
-                                          int[] grantResults) throws JSONException
-    {
+            int[] grantResults) throws JSONException {
         PluginResult result;
-        //This is important if we're using Cordova without using Cordova, but we have the geolocation plugin installed
-        if(context != null) {
-            for (int i=0; i<grantResults.length; i++) {
+        // This is important if we're using Cordova without using Cordova, but we have
+        // the geolocation plugin installed
+        if (context != null) {
+            for (int i = 0; i < grantResults.length; i++) {
                 int r = grantResults[i];
                 String p = permissions[i];
                 if (r == PackageManager.PERMISSION_DENIED && arrayContains(permissionsToCheck, p)) {
@@ -93,10 +94,8 @@ public class Geolocation extends CordovaPlugin {
     }
 
     public boolean hasPermisssion(String[] permissions) {
-        for(String p : permissions)
-        {
-            if(!PermissionHelper.hasPermission(this, p))
-            {
+        for (String p : permissions) {
+            if (!PermissionHelper.hasPermission(this, p)) {
                 return false;
             }
         }
@@ -104,23 +103,31 @@ public class Geolocation extends CordovaPlugin {
     }
 
     /*
-     * We override this so that we can access the permissions variable, which no longer exists in
+     * We override this so that we can access the permissions variable, which no
+     * longer exists in
      * the parent class, since we can't initialize it reliably in the constructor!
      */
 
-    public void requestPermissions(int requestCode)
-    {
-        PermissionHelper.requestPermissions(this, requestCode, permissionsToRequest);
+    public void requestPermissions(int requestCode) {
+
+        Intent explicitIntent = new Intent(highAccuracyPermissions);
+        explicitIntent.setPackage(cordova.getActivity().getPackageName()); // Make Intent explicit
+        PendingIntent permissionIntent = PendingIntent.getBroadcast(
+                cordova.getActivity().getBaseContext(),
+                0,
+                explicitIntent,
+                PendingIntent.FLAG_MUTABLE);
+        PermissionHelper.requestPermissions(this, requestCode, permissionIntent);
+
     }
 
-    //https://stackoverflow.com/a/12635769/777265
+    // https://stackoverflow.com/a/12635769/777265
     private <T> boolean arrayContains(final T[] array, final T v) {
         if (v == null) {
             for (final T e : array)
                 if (e == null)
                     return true;
-        }
-        else {
+        } else {
             for (final T e : array)
                 if (e == v || v.equals(e))
                     return true;
