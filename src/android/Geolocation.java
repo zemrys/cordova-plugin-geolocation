@@ -28,6 +28,8 @@ import org.apache.cordova.PluginResult;
 import org.apache.cordova.LOG;
 import org.json.JSONArray;
 import org.json.JSONException;
+import android.app.PendingIntent;
+import android.content.Intent;
 
 public class Geolocation extends CordovaPlugin {
 
