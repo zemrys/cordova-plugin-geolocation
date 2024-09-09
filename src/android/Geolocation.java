@@ -20,6 +20,10 @@ package org.apache.cordova.geolocation;
 import android.content.pm.PackageManager;
 import android.Manifest;
 import android.os.Build;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
@@ -28,8 +32,6 @@ import org.apache.cordova.PluginResult;
 import org.apache.cordova.LOG;
 import org.json.JSONArray;
 import org.json.JSONException;
-import android.app.PendingIntent;
-import android.content.Intent;
 
 public class Geolocation extends CordovaPlugin {
 
@@ -59,14 +61,14 @@ public class Geolocation extends CordovaPlugin {
                 context.sendPluginResult(r);
                 return true;
             } else {
-                Intent explicitIntent = new Intent(highAccuracyPermissions);
+                Intent explicitIntent = new Intent(Manifest.permission.ACCESS_FINE_LOCATION);
                 explicitIntent.setPackage(cordova.getActivity().getPackageName()); // Make Intent explicit
                 PendingIntent permissionIntent = PendingIntent.getBroadcast(
                         cordova.getActivity().getBaseContext(),
                         0,
                         explicitIntent,
                         PendingIntent.FLAG_MUTABLE);
-                PermissionHelper.requestPermissions(this, 0, permissionIntent);
+                PermissionHelper.requestPermission(this, 0, permissionIntent);
             }
             return true;
         }
@@ -112,14 +114,14 @@ public class Geolocation extends CordovaPlugin {
 
     public void requestPermissions(int requestCode) {
 
-        Intent explicitIntent = new Intent(highAccuracyPermissions);
+        Intent explicitIntent = new Intent(Manifest.permission.ACCESS_FINE_LOCATION);
         explicitIntent.setPackage(cordova.getActivity().getPackageName()); // Make Intent explicit
         PendingIntent permissionIntent = PendingIntent.getBroadcast(
                 cordova.getActivity().getBaseContext(),
                 0,
                 explicitIntent,
                 PendingIntent.FLAG_MUTABLE);
-        PermissionHelper.requestPermissions(this, requestCode, permissionIntent);
+        PermissionHelper.requestPermission(this, requestCode, permissionIntent);
 
     }
 
