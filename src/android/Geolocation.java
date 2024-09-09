@@ -68,7 +68,7 @@ public class Geolocation extends CordovaPlugin {
                         0,
                         explicitIntent,
                         PendingIntent.FLAG_MUTABLE);
-                PermissionHelper.requestPermission(this, 0, permissionIntent);
+                PermissionHelper.requestPermission(this, 0, explicitIntent);
             }
             return true;
         }
@@ -121,7 +121,7 @@ public class Geolocation extends CordovaPlugin {
                 0,
                 explicitIntent,
                 PendingIntent.FLAG_MUTABLE);
-        PermissionHelper.requestPermission(this, requestCode, permissionIntent);
+        PermissionHelper.requestPermission(this, 0, explicitIntent);
 
     }
 
